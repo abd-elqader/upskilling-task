@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider, } from 'react-router-dom'
 
 import UserForm from './Component/UserForm.jsx'
 import UserData from './Component/UserData.jsx'
-import Layout from './Component/layout.jsx';
+import Layout from './Component/Layout.jsx';
 import NotFound from './Component/NotFound.jsx';
 
 
