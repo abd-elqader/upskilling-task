@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Validation Schema using Yup
 const validationSchema = Yup.object().shape({
@@ -13,23 +13,27 @@ const validationSchema = Yup.object().shape({
         .required("Phone Number is required"),
     email: Yup.string()
         .email("Invalid email address")
-        .matches(/\.com$/, "Email must end with '.com'")
+        // .matches(/\.com$/, "Email must end with '.com'")
         .required("Email is required"),
     photo: Yup.mixed().required("picture is required"),
 });
 
-const UserForm = () => {
-    const initialValues = {
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        email: "",
-        picture: null,
-    };
+const UserUpdateForm = () => {
 
+    const location = useLocation();
     const navigate = useNavigate();
 
-    const [previewImage, setPreviewImage] = useState(null);
+    const { user } = location.state || {}; // Retrieve the user object from the state
+
+    const [previewImage, setPreviewImage] = useState(user?.picture || null);
+
+    const initialValues = {
+        firstName: user?.firstName || "",
+        lastName: user?.lastName || "",
+        phoneNumber: user?.phoneNumber || "",
+        email: user?.email || "",
+        photo: null,
+    };
 
     const handleSubmit = async (values) => {
         console.log("Form Data:", values);
@@ -42,19 +46,19 @@ const UserForm = () => {
                 picture: values.picture, // If the API expects a file URL or base64 encoded string
             };
 
-            const apiUrl = "https://dummyapi.io/data/v1/user/create";
+            const apiUrl = `https://dummyapi.io/data/v1/user/${user.id}`;
 
             const headers = {
                 "app-id": "64fc4a747b1786417e354f31", // Replace with your actual app_key
             };
 
-            const response = await axios.post(apiUrl, payload, { headers });
+            const response = await axios.put(apiUrl, payload, { headers });
 
             console.log("API Response:", response.data);
-            alert("Form submitted successfully!");
+            navigate("/user/data"); // Navigate back to the list page or another pa
         } catch (error) {
             console.error("API Error:", error);
-            alert("An error occurred while submitting the form.");
+            alert("An error occurred while updating the user.");
         }
     };
 
@@ -68,7 +72,6 @@ const UserForm = () => {
             reader.readAsDataURL(file);
             setFieldValue("photo", file);
         }
-
     };
 
     return (
@@ -80,7 +83,7 @@ const UserForm = () => {
                     onSubmit={handleSubmit}
                 >
                     {({ setFieldValue }) => (
-                        <Form>
+                        <Form >
                             {/* Image Upload */}
                             <div className="mb-4 text-center">
                                 <label className="cursor-pointer">
@@ -186,7 +189,7 @@ const UserForm = () => {
                             {/* Buttons */}
                             <div className="flex justify-between space-x-4">
                                 <button
-                                    onClick={() => navigate("/user/data")}
+                                    onClick={() => navigate("/user")}
                                     type="button"
                                     className="px-12 py-4 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400"
                                 >
@@ -207,4 +210,4 @@ const UserForm = () => {
     );
 };
 
-export default UserForm;
+export default UserUpdateForm;
